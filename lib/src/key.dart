@@ -1,14 +1,36 @@
 part of "../customized_keyboard.dart";
 
 class CustomKeyboardKey extends StatelessWidget {
+  const CustomKeyboardKey({
+    required this.child,
+    required this.keyEvent,
+    this.padding = EdgeInsets.zero,
+    this.borderRadius,
+    this.color = Colors.transparent,
+    super.key,
+  });
+
   final Widget child;
   final CustomKeyboardEvent? keyEvent;
 
-  const CustomKeyboardKey({super.key, required this.child, required this.keyEvent});
+  final EdgeInsetsGeometry padding;
+  final BorderRadius? borderRadius;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(onTap: () => onTap(context), child: child);
+    return Padding(
+      padding: padding,
+      child: Material(
+        color: color,
+        borderRadius: borderRadius,
+        child: InkWell(
+          borderRadius: borderRadius,
+          onTap: () => onTap(context),
+          child: child,
+        ),
+      ),
+    );
   }
 
   void onTap(BuildContext context) {

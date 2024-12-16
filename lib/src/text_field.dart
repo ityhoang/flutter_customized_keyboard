@@ -230,14 +230,10 @@ class CustomTextField extends StatefulWidget {
     this.canRequestFocus = true,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
-  })  : keyboardType = keyboardType ??
-            (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-        smartDashesType = smartDashesType ??
-            (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-        smartQuotesType = smartQuotesType ??
-            (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-        enableInteractiveSelection =
-            enableInteractiveSelection ?? (!readOnly || !obscureText);
+  })  : keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
+        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText);
 
   /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
   ///
@@ -670,8 +666,7 @@ class CustomTextField extends StatefulWidget {
   /// be possible to move the focus to the text field with tab key.
   final bool canRequestFocus;
 
-  static Widget _defaultContextMenuBuilder(
-      BuildContext context, EditableTextState editableTextState) {
+  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
     return AdaptiveTextSelectionToolbar.editableText(
       editableTextState: editableTextState,
     );
@@ -689,10 +684,11 @@ class CustomTextField extends StatefulWidget {
 
 class _CustomTextFieldState extends State<CustomTextField> with RestorationMixin {
   RestorableTextEditingController? _controller;
-  TextEditingController get _effectiveController =>
-      widget.controller ?? _controller!.value;
+
+  TextEditingController get _effectiveController => widget.controller ?? _controller!.value;
 
   FocusNode? _focusNode;
+
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
   CustomKeyboardConnection? _connection;
@@ -774,24 +770,19 @@ class _CustomTextFieldState extends State<CustomTextField> with RestorationMixin
 
   @override
   void dispose() {
+    _effectiveFocusNode.removeListener(_handleFocusChange);
     if (_connection != null) {
-      _keyboardWrapper?.disconnect(id: _connection!.id);
       _connection = null;
     }
-
-    _effectiveFocusNode.removeListener(_handleFocusChange);
     _focusNode?.dispose();
     _controller?.dispose();
-
     super.dispose();
   }
 
   /// Copied from flutter [TextField]
   void _createLocalController([TextEditingValue? value]) {
     assert(_controller == null);
-    _controller = value == null
-        ? RestorableTextEditingController()
-        : RestorableTextEditingController.fromValue(value);
+    _controller = value == null ? RestorableTextEditingController() : RestorableTextEditingController.fromValue(value);
     if (!restorePending) {
       _registerController();
     }
@@ -800,11 +791,23 @@ class _CustomTextFieldState extends State<CustomTextField> with RestorationMixin
   void _handleFocusChange() {
     // Does it have focus?
     if (_effectiveFocusNode.hasFocus) {
-      _keyboardWrapper?.connect(_connection!);
+      Future.delayed(const Duration(milliseconds: 80), () {
+        _keyboardWrapper?.connect(_connection!);
+      });
+      _keyboardWrapper?._animationController.addStatusListener((status) {
+        if (status == AnimationStatus.forward) {
+          _effectiveFocusNode.requestFocus();
+        }
+        if (status == AnimationStatus.reverse) {
+          _keyboardWrapper?.disconnect(id: _connection!.id);
+        }
+      });
     } else {
       // Only if using a custom keyboard and if connection is active
       if (_isCustomKeyboard && _connection?.isActive == true) {
-        _keyboardWrapper?.disconnect(id: _connection!.id);
+        Future.delayed(const Duration(milliseconds: 80), () {
+          _keyboardWrapper?.disconnect(id: _connection!.id);
+        });
       }
     }
   }
@@ -823,9 +826,7 @@ class _CustomTextFieldState extends State<CustomTextField> with RestorationMixin
     // If this field is already focused and the keyboard connection is inactive,
     // -> reactivate it.
     // This happens when the user manually closed the keyboard.
-    if (_connection?.isActive == false &&
-        _effectiveFocusNode.hasFocus &&
-        _isCustomKeyboard) {
+    if (_connection?.isActive == false && _effectiveFocusNode.hasFocus && _isCustomKeyboard) {
       _keyboardWrapper?.connect(_connection!);
     }
 
@@ -840,9 +841,7 @@ class _CustomTextFieldState extends State<CustomTextField> with RestorationMixin
       controller: _effectiveController,
       focusNode: _effectiveFocusNode,
       decoration: widget.decoration,
-      keyboardType: (widget.keyboardType is CustomTextInputType)
-          ? TextInputType.none
-          : widget.keyboardType,
+      keyboardType: (widget.keyboardType is CustomTextInputType) ? TextInputType.none : widget.keyboardType,
       textInputAction: widget.textInputAction,
       textCapitalization: widget.textCapitalization,
       style: widget.style,
