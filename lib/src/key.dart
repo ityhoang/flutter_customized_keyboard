@@ -36,11 +36,7 @@ class CustomKeyboardKey extends StatelessWidget {
   void onTap(BuildContext context) {
     // Send [character] to keyboard wrapper
     final keyboardWrapper = KeyboardWrapper.of(context);
-    if (keyboardWrapper == null) {
-      throw KeyboardWrapperNotFound();
-    }
-    if (keyEvent != null) {
-      keyboardWrapper.onKey(keyEvent!);
-    }
+    if (keyboardWrapper == null) throw KeyboardWrapperNotFound();
+    if (keyEvent != null) keyboardWrapper.onKey(keyEvent!);
   }
 }

@@ -795,11 +795,10 @@ class _CustomTextFieldState extends State<CustomTextField> with RestorationMixin
         _keyboardWrapper?.connect(_connection!);
       });
       _keyboardWrapper?._animationController.addStatusListener((status) {
-        if (status == AnimationStatus.forward) {
-          _effectiveFocusNode.requestFocus();
-        }
         if (status == AnimationStatus.reverse) {
           _keyboardWrapper?.disconnect(id: _connection!.id);
+        } else if (status == AnimationStatus.forward) {
+          _effectiveFocusNode.requestFocus();
         }
       });
     } else {

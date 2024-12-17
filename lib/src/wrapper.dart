@@ -202,6 +202,7 @@ class KeyboardWrapperState extends State<KeyboardWrapper> with SingleTickerProvi
   void disconnect({required String id}) {
     // Is the current connection id active?
     if (_keyboardConnection?.id == id) {
+      onKey(const CustomKeyboardEvent.calculate());
       // Set as inactive
       _keyboardConnection!.isActive = false;
 
@@ -210,14 +211,7 @@ class KeyboardWrapperState extends State<KeyboardWrapper> with SingleTickerProvi
       // Do this after a possible build is done to prevent an exception that would
       // occur if the widget is currently rebuilding. It might be that we lost focus
       // on the textfield due to a widget rebuild.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        // Only animate out if keyboard connection is null.
-        // This will not be the case if user just changed focus to another field. In that
-        // case the new field would have connected by now.
-        if (_keyboardConnection == null) {
-          _animateOut();
-        }
-      });
+      _animateOut();
     }
 
     // Otherwise, do nothing.
@@ -487,11 +481,6 @@ class KeyboardWrapperState extends State<KeyboardWrapper> with SingleTickerProvi
         _keyboardConnection!.controller.text = t;
         if (_keyboardConnection!.onSubmit != null) {
           _keyboardConnection!.onSubmit!(t);
-        }
-        try {
-          _keyboardConnection!.focusNode.unfocus();
-        } catch (e) {
-          throw KeyboardErrorFocusPrev(e);
         }
         break;
     }
