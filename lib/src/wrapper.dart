@@ -4,6 +4,7 @@ class KeyboardWrapper extends StatefulWidget {
   final Widget child;
   final bool hasBottomSheetOrDialog;
   final bool removePaddingSafe;
+  final Color? colorPaddingSafe;
   final double? width;
   final List<CustomKeyboard> keyboards;
 
@@ -20,6 +21,7 @@ class KeyboardWrapper extends StatefulWidget {
     required this.child,
     this.hasBottomSheetOrDialog = false,
     this.removePaddingSafe = false,
+    this.colorPaddingSafe,
     this.width,
     this.keyboards = const [],
     this.shouldShow,
@@ -111,7 +113,8 @@ class KeyboardWrapperState extends State<KeyboardWrapper> with SingleTickerProvi
               child: SlideTransition(
                 position: _animationPosition,
                 child: Material(
-                  child: Padding(
+                  child: Container(
+                    color: widget.colorPaddingSafe,
                     padding: EdgeInsets.only(bottom: (widget.removePaddingSafe ? 0 : MediaQuery.of(context).padding.bottom)),
                     child: _activeKeyboard,
                   ),
